@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AirQualityML – Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --blue: #2196F3; --dark: #0d1117; --light: #f0f4ff; }
+  body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 3rem; background: var(--dark); color: white;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--blue); }
+  .nav-links a {
+    text-decoration: none; color: #ccc; margin-left: 2rem;
+    padding: 0.4rem 1rem; border-radius: 6px; transition: all 0.2s; font-size: 0.9rem;
+  }
+  .nav-links a:hover { color: white; }
+  .nav-links a.btn-blue {
+    background: var(--blue); color: white; font-weight: 700;
+  }
+
+  .hero {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center;
+    padding: 6rem 2rem;
+    background: radial-gradient(ellipse at top, #e3f0ff 0%, var(--light) 70%);
+  }
+  .hero-tag {
+    background: var(--blue); color: white; font-weight: 700;
+    padding: 0.3rem 1rem; border-radius: 99px; font-size: 0.85rem;
+    margin-bottom: 1.5rem; display: inline-block;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.2rem, 5vw, 4.5rem);
+    font-weight: 800; line-height: 1.1; max-width: 800px; margin-bottom: 1.5rem;
+  }
+  .hero h1 span { color: var(--blue); }
+  .hero p { font-size: 1.1rem; max-width: 540px; color: #555; margin-bottom: 2.5rem; line-height: 1.7; }
+  .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .btn-primary {
+    background: var(--dark); color: white; padding: 0.9rem 2.2rem;
+    border-radius: 8px; text-decoration: none; font-weight: 600; transition: transform 0.2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-secondary {
+    background: var(--blue); color: white; padding: 0.9rem 2.2rem;
+    border-radius: 8px; text-decoration: none; font-weight: 700; transition: transform 0.2s;
+  }
+  .btn-secondary:hover { transform: translateY(-2px); }
+
+  .features {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem; padding: 4rem 3rem; background: var(--dark);
+  }
+  .feature-card {
+    background: #161b22; padding: 2rem; border-radius: 12px;
+    border-left: 4px solid var(--blue);
+  }
+  .feature-card h3 { color: var(--blue); font-family: 'Syne', sans-serif; margin-bottom: 0.5rem; }
+  .feature-card p { color: #8b949e; font-size: 0.9rem; line-height: 1.6; }
+
+  /* Pollutant cards */
+  .pollutants {
+    padding: 4rem 3rem; text-align: center;
+  }
+  .pollutants h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; margin-bottom: 2rem; }
+  .poll-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem; max-width: 900px; margin: 0 auto;
+  }
+  .poll-card {
+    background: white; border-radius: 12px; padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-top: 3px solid var(--blue);
+  }
+  .poll-card .symbol { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: var(--blue); }
+  .poll-card .name { font-size: 0.8rem; color: #777; margin-top: 0.3rem; }
+
+  footer { text-align: center; padding: 2rem; color: #888; font-size: 0.85rem; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🌬️ AirQualityML</div>
+  <div class="nav-links">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}">← Back to Dashboard</a>
+      <a href="{% url 'aq_predict' %}" class="btn-blue">Predict Air Quality</a>
+      <a href="{% url 'logout' %}">Logout</a>
+    {% else %}
+      <a href="{% url 'index' %}">🌿 BananaML</a>
+      <a href="{% url 'login' %}">Login</a>
+      <a href="{% url 'signup' %}" class="btn-blue">Sign Up</a>
+    {% endif %}
+  </div>
+</nav>
+
+<section class="hero">
+  <span class="hero-tag">🎓 Internship Project 2 — ML + Django</span>
+  <h1>Industrial–Residential<br><span>Air Quality Classification</span></h1>
+  <p>Enter pollutant levels and classify air quality instantly using 6 machine learning algorithms. Compare model accuracy in real-time.</p>
+  <div class="hero-btns">
+    <a href="{% url 'aq_predict' %}" class="btn-primary">Start Predicting →</a>
+    <a href="{% url 'signup' %}" class="btn-secondary">Create Account</a>
+  </div>
+</section>
+
+<section class="pollutants">
+  <h2>📊 Pollutants Analyzed</h2>
+  <div class="poll-grid">
+    <div class="poll-card"><div class="symbol">CO</div><div class="name">Carbon Monoxide</div></div>
+    <div class="poll-card"><div class="symbol">NO₂</div><div class="name">Nitrogen Dioxide</div></div>
+    <div class="poll-card"><div class="symbol">SO₂</div><div class="name">Sulfur Dioxide</div></div>
+    <div class="poll-card"><div class="symbol">O₃</div><div class="name">Ozone</div></div>
+    <div class="poll-card"><div class="symbol">PM2.5</div><div class="name">Fine Particulate Matter</div></div>
+    <div class="poll-card"><div class="symbol">PM10</div><div class="name">Coarse Particulate Matter</div></div>
+  </div>
+</section>
+
+<section class="features">
+  <div class="feature-card">
+    <h3>6 ML Algorithms</h3>
+    <p>Logistic Regression, Decision Tree, Random Forest, SVM, KNN, Naive Bayes all run simultaneously.</p>
+  </div>
+  <div class="feature-card">
+    <h3>3 Quality Classes</h3>
+    <p>Classifies air as Good, Moderate, or Poor based on pollutant concentration levels.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Real-Time Accuracy</h3>
+    <p>Compare all models side-by-side and see which performs best on your data.</p>
+  </div>
+  <div class="feature-card">
+    <h3>Secure Login</h3>
+    <p>Full user authentication shared with the BananaML project — one account for both.</p>
+  </div>
+</section>
+
+<footer>© 2025 AirQualityML | Industrial–Residential Air Quality Classification Project</footer>
+</body>
+</html>

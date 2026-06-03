@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard – BananaML</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --orange: #F5A623;
+    --dark:   #1a1a1a;
+    --light:  #FFFDF7;
+    --blue:   #2196F3;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+
+  /* ── Navbar ── */
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 3rem; border-bottom: 2px solid #eee;
+    background: var(--light); position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif; font-size: 1.5rem;
+    font-weight: 800; color: var(--orange); text-decoration: none;
+  }
+  .nav-links { display: flex; align-items: center; gap: 0.5rem; }
+  .nav-links a {
+    text-decoration: none; color: var(--dark); font-weight: 500;
+    padding: 0.45rem 1rem; border-radius: 6px;
+    transition: all 0.2s; font-size: 0.92rem;
+  }
+  .nav-links a:hover { background: #f0f0f0; }
+  .nav-links a.btn-logout {
+    background: var(--orange); color: var(--dark);
+    font-weight: 700; border-radius: 8px;
+  }
+  .nav-links a.btn-logout:hover { opacity: 0.88; }
+
+  /* ── Main Container ── */
+  .dashboard-container {
+    max-width: 1200px; margin: 0 auto; padding: 4rem 2rem;
+    text-align: center;
+  }
+  .dashboard-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.8rem; font-weight: 800;
+    margin-bottom: 1rem; color: var(--dark);
+    letter-spacing: -0.02em;
+  }
+  .dashboard-subtitle {
+    font-size: 1.1rem; color: #666;
+    margin-bottom: 4rem; line-height: 1.6;
+  }
+
+  /* ── Cards Grid ── */
+  .cards-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem; margin-bottom: 3rem;
+  }
+
+  .card {
+    background: white; border-radius: 16px;
+    padding: 2.5rem; box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    transition: all 0.3s ease; text-decoration: none;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    border: 2px solid transparent;
+  }
+  .card:hover {
+    transform: translateY(-8px); box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+    border-color: var(--orange);
+  }
+
+  .card-icon {
+    font-size: 3.5rem; margin-bottom: 1.5rem;
+  }
+
+  .card h2 {
+    font-family: 'Syne', sans-serif; font-size: 1.6rem;
+    font-weight: 800; margin-bottom: 1rem; color: var(--dark);
+  }
+
+  .card p {
+    font-size: 0.95rem; color: #666; line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .card-btn {
+    background: var(--orange); color: var(--dark);
+    padding: 0.8rem 1.8rem; border-radius: 8px;
+    font-weight: 700; text-decoration: none;
+    transition: all 0.2s; font-family: 'Inter', sans-serif;
+    border: none; cursor: pointer; font-size: 0.95rem;
+  }
+  .card-btn:hover { opacity: 0.88; transform: scale(1.05); }
+
+  /* ── Footer ── */
+  footer {
+    text-align: center; padding: 2rem;
+    color: #888; font-size: 0.9rem;
+    border-top: 1px solid #eee;
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .dashboard-title { font-size: 2rem; }
+    .cards-grid { gap: 1.5rem; }
+    .card { padding: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+  <!-- ── Navbar ── -->
+  <nav>
+    <div class="logo">📊 ML Predictor</div>
+    <div class="nav-links">
+      <span style="margin-right: auto; color: #888;">Welcome, <strong>{{ user.username }}</strong></span>
+      <a href="/logout/" class="btn-logout">Logout</a>
+    </div>
+  </nav>
+
+  <!-- ── Dashboard ── -->
+  <div class="dashboard-container">
+    <h1 class="dashboard-title">Choose a Prediction Model</h1>
+    <p class="dashboard-subtitle">Select which ML model you'd like to use for predictions</p>
+
+    <div class="cards-grid">
+      <!-- Banana Leaf Disease Card -->
+      <a href="/predict/" class="card">
+        <div class="card-icon">🍃</div>
+        <h2>Banana Leaf Disease</h2>
+        <p>Predict leaf diseases using image and environmental data with 6 advanced ML models</p>
+        <button class="card-btn">Start Predicting →</button>
+      </a>
+
+      <!-- Air Quality Card -->
+      <a href="/airquality/predict/" class="card">
+        <div class="card-icon">💨</div>
+        <h2>Air Quality Classification</h2>
+        <p>Classify air quality as Industrial or Residential based on pollution metrics</p>
+        <button class="card-btn">Start Predicting →</button>
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <p>&copy; 2026 ML Predictor – ML Powered Prediction Platform</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Predict Air Quality – AirQualityML</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --blue: #2196F3; --dark: #0d1117; --light: #f0f4ff; }
+  body { font-family: 'Inter', sans-serif; background: #f0f4ff; color: var(--dark); }
+
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 3rem; background: var(--dark); color: white;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--blue); text-decoration: none; }
+  .nav-right { display: flex; gap: 1rem; align-items: center; }
+  nav a { color: #ccc; text-decoration: none; font-size: 0.9rem; }
+  nav a:hover { color: var(--blue); }
+  .nav-right a.back-btn { background: var(--blue); color: white; padding: 0.45rem 1rem; border-radius: 6px; font-weight: 600; }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 3rem 1.5rem; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-sub { color: #666; margin-bottom: 2rem; }
+
+  .info-box {
+    background: #e3f0ff; border: 2px solid var(--blue); border-radius: 10px;
+    padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; color: #333;
+  }
+  .info-box strong { color: var(--dark); }
+
+  .card {
+    background: white; border-radius: 14px; padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 2rem;
+  }
+  .card h3 {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem;
+    border-bottom: 2px solid var(--blue); padding-bottom: 0.6rem; margin-bottom: 1.5rem;
+  }
+
+  .form-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem;
+  }
+  @media(max-width: 700px) { .form-grid { grid-template-columns: 1fr 1fr; } }
+  @media(max-width: 480px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+  label { font-weight: 500; font-size: 0.88rem; color: #555; }
+  .unit { font-size: 0.75rem; color: #999; font-weight: 400; }
+
+  input {
+    padding: 0.7rem 1rem; border: 2px solid #e0e8ff;
+    border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+    transition: border-color 0.2s; background: white;
+  }
+  input:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(33,150,243,0.1); }
+
+  .submit-btn {
+    background: var(--dark); color: white; border: none;
+    padding: 1rem 3rem; border-radius: 10px; font-size: 1rem;
+    font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    margin-top: 1.5rem; transition: background 0.2s, transform 0.2s;
+    display: block; width: 100%;
+  }
+  .submit-btn:hover { background: var(--blue); transform: translateY(-1px); }
+
+  /* ── Reference Guide ── */
+  .ref-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;
+  }
+  .ref-card {
+    background: #f8fbff; border-radius: 8px; padding: 0.8rem 1rem;
+    border-left: 3px solid var(--blue); font-size: 0.82rem;
+  }
+  .ref-card strong { display: block; color: var(--blue); margin-bottom: 0.2rem; }
+  .ref-card span { color: #555; }
+
+  /* ── Results ── */
+  .results-section { animation: fadeIn 0.5s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+  .result-hero {
+    border-radius: 14px; padding: 3rem 2rem; text-align: center;
+    margin-bottom: 2rem; background: var(--dark); color: white;
+    position: relative; overflow: hidden;
+  }
+  .result-hero::before {
+    content: ''; position: absolute; top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at 60% 40%, rgba(33,150,243,0.15) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .result-tag {
+    font-size: 0.8rem; color: #8b949e; letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 0.8rem;
+  }
+  .quality-label {
+    font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800;
+    margin-bottom: 0.5rem; line-height: 1.1;
+  }
+  .quality-label.industrial { color: #f44336; }
+  .quality-label.residential { color: #4CAF50; }
+
+  .result-sub { color: #8b949e; font-size: 0.9rem; margin-bottom: 1rem; }
+  .result-meta {
+    color: #aaa; font-size: 0.88rem; margin-top: 0.5rem;
+  }
+  .result-meta strong { color: white; }
+
+  .best-badge {
+    display: inline-block; background: var(--blue); color: white;
+    padding: 0.45rem 1.4rem; border-radius: 99px; font-weight: 700;
+    font-size: 0.85rem; margin-top: 1rem;
+  }
+
+  /* ── Input Summary ── */
+  .input-summary {
+    background: white; border-radius: 14px; padding: 1.5rem 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); margin-bottom: 2rem;
+  }
+  .input-summary h4 {
+    font-family: 'Syne', sans-serif; font-size: 1rem; margin-bottom: 1rem;
+    color: #555; font-weight: 700;
+  }
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.8rem;
+  }
+  @media(max-width: 600px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+  .summary-item {
+    background: #f0f4ff; border-radius: 8px; padding: 0.7rem;
+    text-align: center; border-top: 2px solid var(--blue);
+  }
+  .summary-item .s-label { font-size: 0.72rem; color: #888; margin-bottom: 0.2rem; }
+  .summary-item .s-value { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--dark); }
+
+  /* ── Table ── */
+  .table-wrap {
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .table-title {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700;
+    padding: 1.2rem 1.5rem; border-bottom: 2px solid #f0f0f0;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .table-sub { font-size: 0.8rem; color: #999; font-family: 'Inter', sans-serif; font-weight: 400; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--dark); color: white; padding: 0.9rem 1.2rem;
+    font-family: 'Syne', sans-serif; font-size: 0.8rem;
+    text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td {
+    padding: 1rem 1.2rem; border-bottom: 1px solid #f5f5f5;
+    font-size: 0.9rem; vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.best-row { background: #e8f4ff; }
+  tr:hover:not(.best-row) { background: #fafafa; }
+
+  .algo-name { font-weight: 600; font-size: 0.88rem; }
+  .algo-num { color: #bbb; font-size: 0.8rem; }
+
+  .pred-pill {
+    display: inline-block; padding: 0.28rem 0.85rem;
+    border-radius: 99px; font-size: 0.82rem; font-weight: 600;
+  }
+  .pill-industrial  { background: #ffebee; color: #c62828; }
+  .pill-residential { background: #e8f5e9; color: #2e7d32; }
+
+  .acc-num { font-weight: 700; font-size: 0.92rem; margin-bottom: 3px; }
+  .bar-wrap { background: #eee; border-radius: 99px; height: 5px; }
+  .bar { height: 5px; border-radius: 99px; background: var(--blue); transition: width 1s ease; }
+  .bar.high { background: #4CAF50; }
+
+  .badge-best {
+    display: inline-block; background: var(--blue); color: white;
+    padding: 0.2rem 0.65rem; border-radius: 99px;
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 0.03em;
+  }
+
+  .error {
+    background: #ffebee; color: #c62828; padding: 1rem 1.5rem;
+    border-radius: 10px; margin-bottom: 1.5rem;
+    border-left: 4px solid #c62828; font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">🌬️ AirQualityML</a>
+  <div class="nav-right">
+    <a href="{% url 'dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    <span style="color:#555; font-size:0.9rem;">👤 {{ user.username }}</span>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <h1 class="page-title">🌬️ Air Quality Prediction</h1>
+  <p class="page-sub">Enter pollutant concentrations to classify the area as Industrial or Residential.</p>
+
+  <div class="info-box">
+    <strong>How it works:</strong> All 6 ML algorithms run simultaneously on your input.
+    The best-performing model's result is shown as the final prediction.
+    Industrial areas typically have higher CO, PM2.5, and PM10 values.
+  </div>
+
+  {% if error %}
+    <div class="error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <!-- ── Input Form ── -->
+  <form method="POST" action="{% url 'aq_predict' %}">
+    {% csrf_token %}
+    <div class="card">
+      <h3>🧪 Enter Pollutant Levels</h3>
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>CO – Carbon Monoxide <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="co" step="0.1" min="0" max="2000"
+                 placeholder="e.g. 350"
+                 value="{% if submitted %}{{ co }}{% else %}{{ request.POST.co }}{% endif %}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>NO₂ – Nitrogen Dioxide <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="no2" step="0.1" min="0" max="500"
+                 placeholder="e.g. 45.0"
+                 value="{% if submitted %}{{ no2 }}{% else %}{{ request.POST.no2 }}{% endif %}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>SO₂ – Sulfur Dioxide <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="so2" step="0.1" min="0" max="300"
+                 placeholder="e.g. 20.0"
+                 value="{% if submitted %}{{ so2 }}{% else %}{{ request.POST.so2 }}{% endif %}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>O₃ – Ozone <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="o3" step="0.1" min="0" max="400"
+                 placeholder="e.g. 30.0"
+                 value="{% if submitted %}{{ o3 }}{% else %}{{ request.POST.o3 }}{% endif %}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>PM2.5 – Fine Particulate <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="pm25" step="0.1" min="0" max="500"
+                 placeholder="e.g. 35.0"
+                 value="{% if submitted %}{{ pm25 }}{% else %}{{ request.POST.pm25 }}{% endif %}"
+                 required>
+        </div>
+
+        <div class="form-group">
+          <label>PM10 – Coarse Particulate <span class="unit">(µg/m³)</span></label>
+          <input type="number" name="pm10" step="0.1" min="0" max="600"
+                 placeholder="e.g. 70.0"
+                 value="{% if submitted %}{{ pm10 }}{% else %}{{ request.POST.pm10 }}{% endif %}"
+                 required>
+        </div>
+
+      </div>
+      <button type="submit" class="submit-btn">🔍 Predict Area Type</button>
+    </div>
+
+    <!-- Reference Guide -->
+    <div class="card">
+      <h3>📋 Sample Reference Values</h3>
+      <div class="ref-grid">
+        <div class="ref-card">
+          <strong>🏭 Typical Industrial</strong>
+          <span>CO: 300–1000 | NO₂: 40–70 | SO₂: 30–100 | PM2.5: 20–80 | PM10: 30–100</span>
+        </div>
+        <div class="ref-card">
+          <strong>🏘️ Typical Residential</strong>
+          <span>CO: 50–150 | NO₂: 10–30 | SO₂: 5–20 | PM2.5: 5–20 | PM10: 10–35</span>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <!-- ── Results ── -->
+  {% if submitted %}
+  <div class="results-section">
+
+    <!-- Input Summary -->
+    <div class="input-summary">
+      <h4>📥 Your Input Values</h4>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="s-label">CO</div>
+          <div class="s-value">{{ co }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">NO₂</div>
+          <div class="s-value">{{ no2 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">SO₂</div>
+          <div class="s-value">{{ so2 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">O₃</div>
+          <div class="s-value">{{ o3 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">PM2.5</div>
+          <div class="s-value">{{ pm25 }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-label">PM10</div>
+          <div class="s-value">{{ pm10 }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Result -->
+    <div class="result-hero">
+      <div class="result-tag">🔬 Classification Result</div>
+      <div class="quality-label {% if final_label == 'Industrial' %}industrial{% else %}residential{% endif %}">
+        {% if final_label == 'Industrial' %}🏭{% else %}🏘️{% endif %}
+        {{ final_label }}
+      </div>
+      <div class="result-sub">
+        This area is classified as
+        <strong style="color:white;">{{ final_label }}</strong>
+        based on the pollutant levels provided.
+      </div>
+      <div class="result-meta">
+        Best Model: <strong>{{ best_algo }}</strong>
+      </div>
+      <div class="best-badge">🏆 {{ best_acc }}% Accuracy</div>
+    </div>
+
+    <!-- Algorithm Comparison Table -->
+    <div class="table-wrap">
+      <div class="table-title">
+        📊 Algorithm Comparison
+        <span class="table-sub">All 6 models ran on your input</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Algorithm</th>
+            <th>Prediction</th>
+            <th>Accuracy</th>
+            <th>Rank</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for algo, data in results.items %}
+          <tr {% if algo == best_algo %}class="best-row"{% endif %}>
+
+            <td class="algo-num">{{ forloop.counter }}</td>
+
+            <td class="algo-name">{{ algo }}</td>
+
+            <td>
+              <span class="pred-pill
+                {% if data.label == 'Industrial' %}pill-industrial
+                {% else %}pill-residential{% endif %}">
+                {% if data.label == 'Industrial' %}🏭{% else %}🏘️{% endif %}
+                {{ data.label }}
+              </span>
+            </td>
+
+            <td style="min-width: 150px;">
+              <div class="acc-num">{{ data.accuracy }}%</div>
+              <div class="bar-wrap">
+                <div class="bar {% if data.accuracy >= 85 %}high{% endif %}"
+                     style="width: {{ data.accuracy }}%">
+                </div>
+              </div>
+            </td>
+
+            <td>
+              {% if algo == best_algo %}
+                <span class="badge-best">⭐ BEST</span>
+              {% else %}
+                <span style="color:#ccc; font-size:0.8rem;">—</span>
+              {% endif %}
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  {% endif %}
+
+</div>
+</body>
+</html>

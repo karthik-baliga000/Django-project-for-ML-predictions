@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Predict – BananaML</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --orange: #F5A623; --dark: #1a1a1a; --light: #FFFDF7; }
+  body { font-family: 'Inter', sans-serif; background: #f4f4f0; color: var(--dark); }
+
+  nav {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.2rem 3rem; background: var(--dark); color: white;
+  }
+  .logo { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: var(--orange); text-decoration: none; }
+  .nav-right { display: flex; gap: 1rem; align-items: center; }
+  nav a { color: #ccc; text-decoration: none; font-size: 0.9rem; }
+  nav a:hover { color: var(--orange); }
+  .nav-right a.back-btn { background: var(--orange); color: var(--dark); padding: 0.45rem 1rem; border-radius: 6px; font-weight: 600; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 3rem 1.5rem; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.3rem; }
+  .page-sub { color: #666; margin-bottom: 2.5rem; }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  @media(max-width: 768px) { .layout { grid-template-columns: 1fr; } }
+
+  .card {
+    background: white; border-radius: 14px; padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  }
+  .card h3 {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem;
+    border-bottom: 2px solid var(--orange); padding-bottom: 0.6rem; margin-bottom: 1.5rem;
+  }
+
+  .form-group { margin-bottom: 1.2rem; }
+  label { display: block; font-weight: 500; font-size: 0.88rem; margin-bottom: 0.35rem; color: #555; }
+  input, select {
+    width: 100%; padding: 0.65rem 1rem; border: 2px solid #e8e8e8;
+    border-radius: 8px; font-size: 0.95rem; font-family: inherit;
+    transition: border-color 0.2s; background: white;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--orange); }
+
+  .submit-btn {
+    width: 100%; background: var(--dark); color: white; border: none;
+    padding: 1rem; border-radius: 10px; font-size: 1rem;
+    font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer;
+    margin-top: 0.5rem; transition: background 0.2s;
+  }
+  .submit-btn:hover { background: var(--orange); color: var(--dark); }
+
+  /* Results */
+  .results-section { margin-top: 3rem; }
+
+  .result-hero {
+    background: var(--dark); color: white; border-radius: 14px;
+    padding: 2.5rem; text-align: center; margin-bottom: 2rem;
+    animation: fadeIn 0.5s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+  .result-tag { font-size: 0.85rem; color: #aaa; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .disease-name {
+    font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800;
+    color: var(--orange); margin-bottom: 0.5rem;
+  }
+  .disease-name.healthy { color: #4CAF50; }
+  .disease-name.unhealthy { color: #F5A623; }
+
+  .result-subtitle { color: #aaa; font-size: 0.95rem; margin-bottom: 1rem; }
+  .best-badge {
+    display: inline-block; background: var(--orange); color: var(--dark);
+    padding: 0.4rem 1.2rem; border-radius: 99px; font-weight: 700;
+    font-size: 0.85rem; margin-top: 0.5rem;
+  }
+
+  /* Table */
+  .table-wrap {
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06); animation: fadeIn 0.6s ease;
+  }
+  .table-title {
+    font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700;
+    padding: 1.2rem 1.5rem; border-bottom: 2px solid #f0f0f0;
+    background: white;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    background: var(--dark); color: white; padding: 1rem 1.2rem;
+    font-family: 'Syne', sans-serif; font-size: 0.85rem;
+    text-align: left; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  td { padding: 1rem 1.2rem; border-bottom: 1px solid #f5f5f5; font-size: 0.9rem; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr.best-row { background: #fffbf0; }
+  tr:hover { background: #fafafa; }
+  tr.best-row:hover { background: #fff5e0; }
+
+  .algo-name { font-weight: 600; }
+  .pred-label { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 99px; font-size: 0.82rem; font-weight: 600; }
+  .pred-healthy   { background: #e8f5e9; color: #2e7d32; }
+  .pred-unhealthy { background: #fff3e0; color: #e65100; }
+
+  .acc-text { font-weight: 700; font-size: 0.95rem; margin-bottom: 4px; }
+  .bar-wrap { background: #f0f0f0; border-radius: 99px; height: 6px; }
+  .bar { height: 6px; border-radius: 99px; background: var(--orange); transition: width 0.8s ease; }
+  .bar.high { background: #4CAF50; }
+
+  .badge-best {
+    display: inline-block; background: var(--orange); color: var(--dark);
+    padding: 0.2rem 0.6rem; border-radius: 99px; font-size: 0.72rem;
+    font-weight: 800; letter-spacing: 0.05em;
+  }
+
+  .error {
+    background: #ffe5e5; color: #c0392b; padding: 1rem 1.5rem;
+    border-radius: 10px; margin-bottom: 1.5rem; font-size: 0.9rem;
+    border-left: 4px solid #c0392b;
+  }
+
+  .info-box {
+    background: #fff8e7; border: 2px solid var(--orange); border-radius: 10px;
+    padding: 1rem 1.5rem; margin-bottom: 2rem; font-size: 0.88rem; color: #555;
+  }
+  .info-box strong { color: var(--dark); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">🌿 BananaML</a>
+  <div class="nav-right">
+    <a href="{% url 'dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    <span style="color:#aaa; font-size:0.9rem;">👤 {{ user.username }}</span>
+    <a href="{% url 'logout' %}">Logout</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <h1 class="page-title">🌿 Disease Prediction</h1>
+  <p class="page-sub">Enter banana leaf attributes below and click Predict to run all 6 ML models.</p>
+
+  <div class="info-box">
+    <strong>How it works:</strong> All 6 classification algorithms will run simultaneously.
+    The best-performing model's prediction is shown as the final result.
+    Accuracy is based on training evaluation.
+  </div>
+
+  {% if error %}
+    <div class="error">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <form method="POST" action="{% url 'predict' %}">
+    {% csrf_token %}
+    <div class="layout">
+
+      <!-- Left Column: Leaf Data -->
+      <div class="card">
+        <h3>🍃 Leaf Measurements</h3>
+
+        <div class="form-group">
+          <label>Leaf Length (cm)</label>
+          <input type="number" name="leaf_length" step="0.01" min="1" max="200"
+                 placeholder="e.g. 25.5" value="{{ request.POST.leaf_length }}" required>
+        </div>
+
+        <div class="form-group">
+          <label>Leaf Width (cm)</label>
+          <input type="number" name="leaf_width" step="0.01" min="1" max="100"
+                 placeholder="e.g. 21.49" value="{{ request.POST.leaf_width }}" required>
+        </div>
+
+        <div class="form-group">
+          <label>Colour Intensity</label>
+          <select name="colour_intensity" required>
+            <option value="">-- Select --</option>
+            <option value="Dark"   {% if request.POST.colour_intensity == "Dark"   %}selected{% endif %}>Dark</option>
+            <option value="Light"  {% if request.POST.colour_intensity == "Light"  %}selected{% endif %}>Light</option>
+            <option value="Medium" {% if request.POST.colour_intensity == "Medium" %}selected{% endif %}>Medium</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Spots Present</label>
+          <select name="spots_present" required>
+            <option value="">-- Select --</option>
+            <option value="1" {% if request.POST.spots_present == "1" %}selected{% endif %}>Yes</option>
+            <option value="0" {% if request.POST.spots_present == "0" %}selected{% endif %}>No</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Moisture Level (%)</label>
+          <input type="number" name="moisture_level" step="0.01" min="0" max="100"
+                 placeholder="e.g. 58.7" value="{{ request.POST.moisture_level }}" required>
+        </div>
+
+      </div>
+
+      <!-- Right Column: Environmental Data -->
+      <div class="card">
+        <h3>🌡️ Environmental Conditions</h3>
+
+        <div class="form-group">
+          <label>Texture</label>
+          <select name="texture" required>
+            <option value="">-- Select --</option>
+            <option value="Rough"  {% if request.POST.texture == "Rough"  %}selected{% endif %}>Rough</option>
+            <option value="Smooth" {% if request.POST.texture == "Smooth" %}selected{% endif %}>Smooth</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Humidity (%)</label>
+          <input type="number" name="humidity" step="0.01" min="0" max="100"
+                 placeholder="e.g. 69.39" value="{{ request.POST.humidity }}" required>
+        </div>
+
+        <div class="form-group">
+          <label>Temperature (°C)</label>
+          <input type="number" name="temperature" step="0.01" min="0" max="60"
+                 placeholder="e.g. 22.8" value="{{ request.POST.temperature }}" required>
+        </div>
+
+        <div class="form-group">
+          <label>Soil Type</label>
+          <select name="soil_type" required>
+            <option value="">-- Select --</option>
+            <option value="Clay"  {% if request.POST.soil_type == "Clay"  %}selected{% endif %}>Clay</option>
+            <option value="Sandy" {% if request.POST.soil_type == "Sandy" %}selected{% endif %}>Sandy</option>
+            <option value="Loamy" {% if request.POST.soil_type == "Loamy" %}selected{% endif %}>Loamy</option>
+          </select>
+        </div>
+
+        <button type="submit" class="submit-btn">🔍 Predict Disease</button>
+      </div>
+
+    </div>
+  </form>
+
+  <!-- ── Results Section ── -->
+  {% if submitted %}
+  <div class="results-section">
+
+    <!-- Hero Result Card -->
+    <div class="result-hero">
+      <div class="result-tag">Final Prediction Result</div>
+      <div class="disease-name {% if final_label == 'Healthy' %}healthy{% else %}unhealthy{% endif %}">
+        {% if final_label == 'Healthy' %}✅{% else %}⚠️{% endif %} {{ final_label }}
+      </div>
+      <div class="result-subtitle">Predicted by the best-performing algorithm</div>
+      <div style="color:#bbb; font-size:0.9rem; margin-top:0.5rem;">
+        Best Model: <strong style="color:white;">{{ best_algo }}</strong>
+      </div>
+      <div class="best-badge">🏆 {{ best_acc }}% Accuracy</div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="table-wrap">
+      <div class="table-title">📊 Algorithm Comparison</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Algorithm</th>
+            <th>Prediction</th>
+            <th>Accuracy</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for algo, data in results.items %}
+          <tr {% if algo == best_algo %}class="best-row"{% endif %}>
+            <td style="color:#aaa; font-size:0.85rem;">{{ forloop.counter }}</td>
+            <td class="algo-name">{{ algo }}</td>
+            <td>
+              <span class="pred-label {% if data.label == 'Healthy' %}pred-healthy{% else %}pred-unhealthy{% endif %}">
+                {{ data.label }}
+              </span>
+            </td>
+            <td style="min-width:140px;">
+              <div class="acc-text">{{ data.accuracy }}%</div>
+              <div class="bar-wrap">
+                <div class="bar {% if data.accuracy >= 80 %}high{% endif %}"
+                     style="width: {{ data.accuracy }}%"></div>
+              </div>
+            </td>
+            <td>
+              {% if algo == best_algo %}
+                <span class="badge-best">⭐ BEST</span>
+              {% else %}
+                <span style="color:#bbb; font-size:0.8rem;">—</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  {% endif %}
+
+</div>
+</body>
+</html>
