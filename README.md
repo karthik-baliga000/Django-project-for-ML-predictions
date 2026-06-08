@@ -1,4 +1,4 @@
-# Django Machine Learning Prediction System
+# Django based  Machine Learning Prediction System
 
 A Django-based web application that integrates Machine Learning models for predictive analytics. The system provides prediction services in two domains:
 
